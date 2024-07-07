@@ -5,14 +5,14 @@ const taskDescriptionInput = $('#task-description-input');
 
 // Retrieve tasks and nextId from localStorage
 function readTaskListFromStorage() {
-let taskList = JSON.parse(localStorage.getItem("tasks"));
+let tasks = JSON.parse(localStorage.getItem("tasks"));
 let nextId = JSON.parse(localStorage.getItem("nextId"));
 
-if (!taskList) {
-    taskList = [];
+if (!tasks) {
+    tasks = [];
   }
 
-  return taskList;
+  return tasks;
 };
 
 // Accepts an array of projects, stringifys them, and saves them in localStorage.
@@ -23,10 +23,10 @@ function saveTasksToStorage(tasks) {
 // Todo: create a function to create a task card
 function createTaskCard(task) {
     const taskCard = $('<div>')
-        .addClass('card text-center mb-3 draggable')
+        .addClass('card text-center mb-3 my-3 draggable task-card')
         .attr('data-task-id', task.id);
     const cardTitle = $('<h5>')
-        .addClass('card-title')
+        .addClass('card-title h4')
         .text(task.title);
     const cardBody = $('<div>')
         .addClass('card-body');
@@ -40,7 +40,7 @@ function createTaskCard(task) {
         .addClass('btn btn-danger delete')
         .text('Delete')
         .attr('data-task-id', task.id);
-    cardDeleteButton('click', handleDeleteTask);
+    cardDeleteButton.on('click', handleDeleteTask);
 
     // Append elements to taskCard div element
     cardBody.append(cardDueDate, cardDescription);
@@ -53,13 +53,24 @@ function createTaskCard(task) {
 // Todo: create a function to render the task list and make cards draggable
 function renderTaskList() {
     const tasks = readTaskListFromStorage();
-    const toDoList = $('#todo-cards');
 
-    toDoList.append(createTaskCard(task));
+    const toDoList = $('#todo-cards');
+    toDoList.empty();
+
+    const inProgressList = $('#in-progress-cards');
+    inProgressList.empty();
+
+    const doneList = $('#done-cards');
+    doneList.empty();
+
 
     $('.draggable').draggable({
         opacity: 0.7,
         zIndex: 100,
+    });
+
+    tasks.forEach((task) => {
+        toDoList.append(createTaskCard(task));
     });
 }
 
@@ -85,13 +96,26 @@ function handleAddTask(event){
     saveTasksToStorage(tasks);
 
     renderTaskList();
+
+    $('#formModal').modal('hide');
 }
 
-formSubmit.on('submit', handleAddTask);
+formSubmit.on('click', handleAddTask);
 
 // Todo: create a function to handle deleting a task
 function handleDeleteTask(event){
+    const taskId = $(this).attr('data-task-id');
+    const tasks = readTaskListFromStorage();
 
+    tasks.forEach((task) => {
+        if (task.id === taskId) {
+            tasks.splice(tasks.indexOf(tasks), 1);
+        }
+    });
+
+    saveTasksToStorage(tasks);
+
+    renderTaskList();
 }
 
 // Todo: create a function to handle dropping a task into a new status lane
