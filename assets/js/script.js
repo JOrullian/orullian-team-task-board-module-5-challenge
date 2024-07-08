@@ -42,6 +42,19 @@ function createTaskCard(task) {
         .attr('data-task-id', task.id);
     cardDeleteButton.on('click', handleDeleteTask);
 
+    // Set background color based on due date
+    if (task.dueDate && task.status !== 'done') {
+        const now = dayjs();
+        const taskDueDate = dayjs(task.dueDate, 'DD/MM/YYYY');
+
+        if (now.isSame(taskDueDate, 'day')) {
+            taskCard.addClass('bg-warning text-white');
+        } else if (now.isAfter(taskDueDate)) {
+            taskCard.addClass('bg-danger text white');
+        }
+    }
+
+
     // Append elements to taskCard div element
     cardBody.append(cardDueDate, cardDescription);
     taskCard.append(cardTitle, cardBody, cardDeleteButton);
